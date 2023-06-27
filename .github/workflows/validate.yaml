@@ -23,6 +23,7 @@ jobs:
           for FILE in $WORKFLOW_FILES; do
             FILE_CONTENT=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                                 -s "https://api.github.com/repos/$OWNER/$REPO/contents/.github/workflows/$FILE" | jq -r '.content' | base64 --decode)
+            echo $FILE_CONTENT
             if [[ $FILE_CONTENT == *"pull_request"* ]]; then
               FOUND_PR_WORKFLOW=true
               echo "Workflow $FILE is triggered by pull requests"
