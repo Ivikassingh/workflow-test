@@ -1,43 +1,19 @@
-name: Check CODEOWNERS
+name: Validate Codeowners
 
 on:
   push:
     branches:
       - main
 
+
 jobs:
-  check_codeowners:
+  validate_codeowners:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install JQ
-        run: sudo apt-get install jq
-
-      - name: Check for CODEOWNERS file
-        run: |
-          if [ ! -f .github/CODEOWNERS ]; then
-            echo "CODEOWNERS file does not exist!"
-            exit 1
-          fi
-
-      - name: Check paths in CODEOWNERS
-        run: |
-          while IFS= read -r line
-          do
-            # ignore empty lines and lines starting with '#'
-            if [[ -z "$line" || $line == \#* ]]; then
-              continue
-            fi
-
-            # extract file path (ignoring any comments after the path)
-            path=$(echo "$line" | cut -d ' ' -f 1 | cut -d '#' -f 1)
-
-            # check if file or directory exists
-            if [ ! -e "$path" ]; then
-              echo "Invalid path in CODEOWNERS: $path"
-              exit 1
-            fi
-          done < .github/CODEOWNERS
-
+      - name: Validate Codeowners file
+        uses: mszostok/codeowners-validator@v0.6.0  
+        with:
+          checks: "existence,files,owners"
