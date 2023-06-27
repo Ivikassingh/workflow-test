@@ -18,7 +18,7 @@ jobs:
           
           WORKFLOW_FILES=$(ls .github/workflows/*.yaml)
           FOUND_PR_WORKFLOW=false
-          
+          echo $WORKFLOW_FILES
           for FILE in $WORKFLOW_FILES; do
             ON_SECTION=$(yq e '.on' $FILE)
             if [[ $ON_SECTION == *"pull_request"* ]]; then
