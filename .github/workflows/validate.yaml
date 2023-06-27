@@ -26,6 +26,7 @@ jobs:
             if [[ $FILE_CONTENT == *"pull_request"* ]]; then
               FOUND_PR_WORKFLOW=true
               echo "Workflow $FILE is triggered by pull requests"
+              break
             fi
           done
           if [[ $FOUND_PR_WORKFLOW == false ]]; then
