@@ -16,7 +16,7 @@ jobs:
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.13.2/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
           
-          WORKFLOW_FILES=$(ls .github/workflows/*.yaml)
+          WORKFLOW_FILES=$(ls .github/workflows/*.{yaml,yml})
           FOUND_PR_WORKFLOW=false
           echo $WORKFLOW_FILES
           echo "Test"
