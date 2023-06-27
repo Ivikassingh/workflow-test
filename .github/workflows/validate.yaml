@@ -1,4 +1,4 @@
-name: Validate Workflows
+name: Validate Workflows Run on Pull Request
 
 on:
   push:
@@ -16,12 +16,15 @@ jobs:
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.13.2/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
           
+          ## Fetch all the File
           WORKFLOW_FILES=$(ls .github/workflows/*.{yaml,yml})
           FOUND_PR_WORKFLOW=false
-          echo $WORKFLOW_FILES
-          echo "Test"
+
+          ## Read the File
           for FILE in $WORKFLOW_FILES; do
             ON_SECTION=$(yq e '.on' $FILE)
+            
+            ## We are checking using YQ that this yaml has pull_request in on section or not
             if [[ $ON_SECTION == *"pull_request"* ]]; then
               FOUND_PR_WORKFLOW=true
               echo "Workflow $FILE is triggered by pull requests"
@@ -29,6 +32,7 @@ jobs:
             fi
           done
           
+          ## If no workflow for pull_request
           if [[ $FOUND_PR_WORKFLOW == false ]]; then
             echo "No workflow is triggered by pull requests"
             exit 1
