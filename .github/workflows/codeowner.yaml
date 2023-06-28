@@ -1,19 +1,19 @@
-# name: Validate Codeowners
+name: Validate Codeowners
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
 
-# jobs:
-#   validate_codeowners:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
+jobs:
+  validate_codeowners:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-#       - name: Validate Codeowners file
-#         uses: mszostok/codeowners-validator@v0.6.0  
-#         with:
-#           checks: "existence,files,owners"
+      - name: Validate Codeowners file
+        uses: mszostok/codeowners-validator@v0.6.0  
+        with:
+          checks: "existence,files,owners"
