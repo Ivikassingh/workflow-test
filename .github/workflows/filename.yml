@@ -1,0 +1,10 @@
+name: Print Current Workflow Filename
+
+on: [push]
+
+jobs:
+  print_filename:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the workflow filename
+        run: echo "The filename of this workflow is ${{ github.workflow }}.yml"
