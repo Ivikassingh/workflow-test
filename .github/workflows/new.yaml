@@ -1,5 +1,4 @@
-
-name: Validate Workflows Run on Pull Request add comment
+name: Validate Workflows Run on Pull Request comment
 
 
 on:
@@ -21,10 +20,10 @@ jobs:
           echo "${{ steps.get_files.outputs.workflow_files }}"
 
       - name: Get PR Number
+        id: pr
         run: |
           echo "PR Number: ${{ github.event.pull_request.number }}" 
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          echo "::set-output name=number::${{ github.event.pull_request.number }}"
 
 #       - name: Create comment
 #         uses: peter-evans/create-or-update-comment@v3
@@ -44,7 +43,7 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.13.2/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
-          echo "$PR_NUMBER"
+          echo "${{ steps.pr.outputs.number }}"
 
       - name: Check if workflows have pull_request trigger
         id: check_pull_request
