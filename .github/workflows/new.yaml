@@ -1,7 +1,7 @@
+name: List YAML Files
 
-name: Remove Filename from List
-
-on: [push, pull_request]
+on:
+  push:
 
 jobs:
   list_files:
@@ -10,10 +10,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: List files in .github/workflows directory
+      - name: List .yaml and .yml files in .github/workflows directory
         id: get_files
         run: |
-          echo "::set-output name=workflow_files::$(ls .github/workflows)"
+          echo "::set-output name=workflow_files::$(ls .github/workflows/*.y{a,}ml)"
 
       - name: Print file list
         run: echo "${{ steps.get_files.outputs.workflow_files }}"
