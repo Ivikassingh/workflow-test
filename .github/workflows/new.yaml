@@ -1,10 +1,10 @@
-name: Validate Workflows Run on Pull Request comment
-
+name: Validate Workflows Run on Pull Request
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-
+env:
+  WORKFLOW_FILE: new.yaml
 
 jobs:
   check_workflows:
@@ -13,11 +13,45 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Get workflow file path
+      - name: List .yaml and .yml files in .github/workflows directory
+        id: get_files
         run: |
-          echo "::set-output name=path::.github/workflows/${{ github.workflow }}.yml"
-        id: workflow
-      - name: Print workflow file path
+          echo "::set-output name=workflow_files::$(ls .github/workflows/*.{yaml,yml} | grep -v "$WORKFLOW_FILE" | tr '\n' ' ')"
+
+      - name: Get PR Number
+        id: pr
+        run: echo "::set-output name=number::${{ github.event.pull_request.number }}"
+
+      - name: Install yq
         run: |
-          echo "${{ steps.workflow.outputs.path }}"
-      
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.13.2/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Check if workflows have pull_request trigger
+        id: check_pull_request
+        run: |
+          echo "${{ steps.get_files.outputs.workflow_files }}"
+          IFS=' ' read -r -a files <<< "${{ steps.get_files.outputs.workflow_files }}"
+          FOUND_PR_WORKFLOW=false
+          for file in "${files[@]}"; do
+            ON_SECTION=$(yq e '.on' $file)
+            if [[ $ON_SECTION == *"pull_request"* ]]; then
+              FOUND_PR_WORKFLOW=true
+              echo "Workflow $file is triggered by pull requests"
+              break
+            fi
+          done
+          echo "::set-output name=found::${FOUND_PR_WORKFLOW}"
+
+      - name: Create comment
+        if: steps.check_pull_request.outputs.found == 'false'
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ steps.pr.outputs.number }}
+          body: |
+            This is a multi-line test comment
+            - With GitHub **Markdown** :sparkles:
+            - Created by [create-or-update-comment][1]
+
+            [1]: https://github.com/peter-evans/create-or-update-comment
+          reactions: '+1'
