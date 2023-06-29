@@ -13,13 +13,12 @@ jobs:
       - name: Store filename in a variable
         id: get_filename
         run: |
-          FILE_NAME=${{ github.workflow }}.yml
-          echo "::set-output name=file_name::$FILE_NAME"
+          echo "::set-output name=workflow_file_cr::${{ github.workflow }}.yml"
           
       - name: Get list of files
         id: get_files
         run: |
-          FILE_LIST=$(ls .github/workflows/*.{yaml,yml} | grep -v "${{ steps.get_filename.outputs.file_name }}")
+          FILE_LIST=$(ls .github/workflows/*.{yaml,yml} | grep -v "${{ steps.get_filename.outputs.workflow_file_cr }}")
           echo "::set-output name=workflow_files::$FILE_LIST"
       
       - name: Print list of files
