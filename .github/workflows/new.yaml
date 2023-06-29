@@ -1,5 +1,4 @@
 name: Validate Workflows Run 
-
 on:
   push:
 
@@ -11,28 +10,29 @@ jobs:
         uses: actions/checkout@v2
 
       - name: List .yaml and .yml files in .github/workflows directory
-        id: get_filess
-        run: |
-          echo "${{ github.action }}"
-          echo "${{ github.workflow }}"
-
-      - name: List .yaml and .yml files in .github/workflows directory
         id: get_files
         run: |
           echo "::set-output name=workflow_files::$(ls .github/workflows/*.{yaml,yml} | tr '\n' ' ')"
-
+      
       - name: Check if workflows have pull_request trigger
         id: check_pull_request
-        run: |
-          IFS=' ' read -r -a files <<< "${{ steps.get_files.outputs.workflow_files }}"
-          FOUND_PR_WORKFLOW=false
-          for file in "${files[@]}"; do
-            TRIGGER=$(yq e '.on.pull_request' $file)
-            if [[ "$TRIGGER" != "null" ]]; then
-              FOUND_PR_WORKFLOW=true
-              echo "Workflow $file is triggered by pull requests"
-              break
-            fi
-          done
-          echo "$FOUND_PR_WORKFLOW" > pr_workflow_check.txt
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            IFS=' ' read -r -a files <<< "${{ steps.get_files.outputs.workflow_files }}"
+            FOUND_PR_WORKFLOW=false
+            for file in "${files[@]}"; do
+              TRIGGER=$(yq e '.on.pull_request' $file)
+              if [[ "$TRIGGER" != "null" ]]; then
+                FOUND_PR_WORKFLOW=true
+                echo "Workflow $file is triggered by pull requests"
+              fi
+            done
+            echo "$FOUND_PR_WORKFLOW"
 
+      - name: Fail if no workflow triggers on pull_request
+        run: |
+          if [[ "${{ steps.check_pull_request.outputs.result }}" == "false" ]]; then
+            echo "No workflow is triggered by pull requests"
+            exit 1
+          fi
