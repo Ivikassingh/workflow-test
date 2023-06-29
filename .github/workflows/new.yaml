@@ -1,39 +1,12 @@
-name: Validate Workflows Run on Pull Request
+name: Get PR Number
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  check_workflows:
+  print_pr_number:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: List .yaml and .yml files in .github/workflows directory
-        id: get_files
-        run: |
-          echo "::set-output name=workflow_files::$(ls .github/workflows/*.{yaml,yml} | tr '\n' ' ')"
-      
-      - name: Check if workflows have pull_request trigger
-        id: check_pull_request
-        uses: mikefarah/yq@master
-        with:
-          cmd: |
-            IFS=' ' read -r -a files <<< "${{ steps.get_files.outputs.workflow_files }}"
-            FOUND_PR_WORKFLOW=false
-            for file in "${files[@]}"; do
-              ON_SECTION=$(yq e -j '.on' $file)
-              if [[ $ON_SECTION == *"pull_request"* ]]; then
-                FOUND_PR_WORKFLOW=true
-                echo "Workflow $file is triggered by pull requests"
-              fi
-            done
-            echo "$FOUND_PR_WORKFLOW"
-
-      - name: Fail if no workflow triggers on pull_request
-        run: |
-          if [[ "${{ steps.check_pull_request.outputs.result }}" == "false" ]]; then
-            echo "No workflow is triggered by pull requests"
-            exit 1
-          fi
+      - name: Get PR Number
+        run: echo "PR Number: ${{ github.event.pull_request.number }}"
