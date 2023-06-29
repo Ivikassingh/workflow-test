@@ -1,4 +1,5 @@
-name: Validate Workflows Run 
+name: Validate Workflows Run on Pull Request
+
 on:
   push:
 
@@ -22,8 +23,8 @@ jobs:
             IFS=' ' read -r -a files <<< "${{ steps.get_files.outputs.workflow_files }}"
             FOUND_PR_WORKFLOW=false
             for file in "${files[@]}"; do
-              TRIGGER=$(yq e '.on.pull_request' $file)
-              if [[ "$TRIGGER" != "null" ]]; then
+              ON_SECTION=$(yq e -j '.on' $file)
+              if [[ $ON_SECTION == *"pull_request"* ]]; then
                 FOUND_PR_WORKFLOW=true
                 echo "Workflow $file is triggered by pull requests"
               fi
