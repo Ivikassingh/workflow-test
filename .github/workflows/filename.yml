@@ -1,10 +1,28 @@
-name: Print Current Workflow Filename
 
-on: [push]
+name: Remove Filename from List
+
+on: [push, pull_request]
 
 jobs:
-  print_filename:
+  remove_filename:
     runs-on: ubuntu-latest
     steps:
-      - name: Get the workflow filename
-        run: echo "The filename of this workflow is ${{ github.workflow }}.yml"
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Store filename in a variable
+        id: get_filename
+        run: |
+          FILE_NAME=${{ github.workflow }}.yml
+          echo "::set-output name=file_name::$FILE_NAME"
+          
+      - name: Get list of files
+        id: get_files
+        run: |
+          FILE_LIST=$(ls .github/workflows/*.{yaml,yml} | grep -v "${{ steps.get_filename.outputs.file_name }}")
+          echo "::set-output name=workflow_files::$FILE_LIST"
+      
+      - name: Print list of files
+        run: |
+          echo "List of workflow files without the specified filename:"
+          echo "${{ steps.get_files.outputs.workflow_files }}"
