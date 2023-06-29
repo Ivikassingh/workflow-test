@@ -11,6 +11,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: List .yaml and .yml files in .github/workflows directory
+        id: get_filess
+        run: |
+          echo "${{ github.action }}"
+          echo "${{ github.workflow }}"
+
+      - name: List .yaml and .yml files in .github/workflows directory
         id: get_files
         run: |
           echo "::set-output name=workflow_files::$(ls .github/workflows/*.{yaml,yml} | tr '\n' ' ')"
