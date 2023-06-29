@@ -17,3 +17,8 @@ jobs:
 
       - name: Print file list
         run: echo "${{ steps.get_files.outputs.workflow_files }}"
+
+      - name: List .yaml and .yml files in .github/workflows directory
+        id: get_files2
+        run: |
+          ls .github/workflows
