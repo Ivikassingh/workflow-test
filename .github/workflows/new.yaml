@@ -1,5 +1,4 @@
-name: Validate Workflows Run on Pull Request
-
+name: Validate Workflows Run 
 on:
   push:
 
@@ -13,21 +12,19 @@ jobs:
       - name: List .yaml and .yml files in .github/workflows directory
         id: get_files
         run: |
-          echo "::set-output name=workflow_files::$(echo $(ls .github/workflows/*.y{a,}ml))"
+          echo "::set-output name=workflow_files::$(ls .github/workflows/*.{yaml,yml})"
 
       - name: Check if workflows have pull_request trigger
+        id: check_pull_request
         run: |
-          files="${{ steps.get_files.outputs.workflow_files }}"
-          for file in $files; do
-            result=$(yq e '.on.pull_request' $file)
-            if [[ "$result" != "null" ]]; then
+          IFS=' ' read -r -a files <<< "${{ steps.get_files.outputs.workflow_files }}"
+          for file in "${files[@]}"; do
+            if [ $(yq e '.on.pull_request' $file) != "null" ]; then
+              echo "Workflow $file is triggered by pull requests"
               echo "::set-output name=has_pull_request::true"
-              echo "$file is triggered by pull requests"
               exit 0
             fi
           done
-          echo "::set-output name=has_pull_request::false"
           echo "No workflow is triggered by pull requests"
+          echo "::set-output name=has_pull_request::false"
           exit 1
-        id: check_pull_request
-
