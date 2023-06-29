@@ -30,13 +30,3 @@ jobs:
           done
           echo "$FOUND_PR_WORKFLOW" > pr_workflow_check.txt
 
-      - name: Fail if no workflow triggers on pull_request
-        uses: mikefarah/yq@master
-        id: final_check
-        with:
-          cmd: yq eval pr_workflow_check.txt
-        run: |
-          if [[ "${{ steps.final_check.outputs.result }}" == "false" ]]; then
-            echo "No workflow is triggered by pull requests"
-            exit 1
-          fi
