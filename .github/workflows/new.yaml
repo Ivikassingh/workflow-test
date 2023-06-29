@@ -1,4 +1,5 @@
-name: Validate Workflows Run
+name: Validate Workflows Run on Pull Request
+
 on:
   push:
 
@@ -13,11 +14,6 @@ jobs:
         id: get_files
         run: |
           echo "::set-output name=workflow_files::$(ls .github/workflows/*.{yaml,yml} | tr '\n' ' ')"
-          
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/download/v4.13.2/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
 
       - name: Check if workflows have pull_request trigger
         id: check_pull_request
@@ -25,14 +21,22 @@ jobs:
           IFS=' ' read -r -a files <<< "${{ steps.get_files.outputs.workflow_files }}"
           FOUND_PR_WORKFLOW=false
           for file in "${files[@]}"; do
-            ON_SECTION=$(yq e '.on' $file)
-            if [[ $ON_SECTION == *"pull_request"* ]]; then
+            TRIGGER=$(yq e '.on.pull_request' $file)
+            if [[ "$TRIGGER" != "null" ]]; then
               FOUND_PR_WORKFLOW=true
               echo "Workflow $file is triggered by pull requests"
               break
             fi
           done
-          if [[ $FOUND_PR_WORKFLOW == false ]]; then
+          echo "$FOUND_PR_WORKFLOW" > pr_workflow_check.txt
+
+      - name: Fail if no workflow triggers on pull_request
+        uses: mikefarah/yq@master
+        id: final_check
+        with:
+          cmd: yq eval pr_workflow_check.txt
+        run: |
+          if [[ "${{ steps.final_check.outputs.result }}" == "false" ]]; then
             echo "No workflow is triggered by pull requests"
             exit 1
           fi
