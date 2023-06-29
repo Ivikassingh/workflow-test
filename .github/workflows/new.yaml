@@ -1,0 +1,19 @@
+
+name: Remove Filename from List
+
+on: [push, pull_request]
+
+jobs:
+  list_files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: List files in .github/workflows directory
+        id: get_files
+        run: |
+          echo "::set-output name=workflow_files::$(ls .github/workflows)"
+
+      - name: Print file list
+        run: echo "${{ steps.get_files.outputs.workflow_files }}"
