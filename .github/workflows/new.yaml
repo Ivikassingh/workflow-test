@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 env:
-  WORKFLOW_FILE: new.yaml
+  WORKFLOW_FILE: new.yaml 
 
 jobs:
   check_workflows:
