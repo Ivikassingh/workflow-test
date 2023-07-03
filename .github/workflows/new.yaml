@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env: 
-  WORKFLOW_FILE: workflows_validation.yml
+  WORKFLOW_FILE: new.yml
 
 jobs:
   check_workflows:

@@ -4,10 +4,19 @@ name: CI
 
 # Controls when the workflow will run
 on: 
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+    # types:
+    #   - ready_for_review
+    #   - review_request_removed
+    #   - reopened
+    #   - opened
+    #   - synchronize
+    #   - labeled
 
+  pull_request: 
+    types: [opened, synchronize, reopened]
 
   # # Allows you to run this workflow manually from the Actions tab
   # workflow_dispatch:
