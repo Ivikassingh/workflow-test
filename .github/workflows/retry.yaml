@@ -1,6 +1,6 @@
 name: Retry Failed Workflow
 on:
-  workflow_dispatch
+  workflow_dispatch:
 
 env:
   RETRY_LIMIT: 3 # Set your retry limit 
