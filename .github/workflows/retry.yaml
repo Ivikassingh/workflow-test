@@ -22,5 +22,5 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: validate.yaml
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           # ref: ${{ steps.extract_branch.outputs.branch }}
