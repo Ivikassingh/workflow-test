@@ -15,7 +15,6 @@ jobs:
     steps:
       - name: Extract branch name
         id: extract_branch
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       
       - name: Trigger new workflow run
         uses: benc-uk/workflow-dispatch@v1
