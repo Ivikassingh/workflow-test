@@ -1,0 +1,25 @@
+name: Retry Failed Workflow
+on:
+  workflow_run:
+    workflows: ["validate.yaml"]
+    types:
+      - completed
+
+env:
+  RETRY_LIMIT: 3 # Set your retry limit
+
+jobs:
+  rerun-failed-workflow:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_number <= env.RETRY_LIMIT }}
+    steps:
+      - name: Extract branch name
+        id: extract_branch
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      
+      - name: Trigger new workflow run
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: validate.yaml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # ref: ${{ steps.extract_branch.outputs.branch }}
