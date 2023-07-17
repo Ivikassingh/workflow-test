@@ -5,7 +5,7 @@ on:
     types:
       - completed
 
-env: 
+env:
   RETRY_LIMIT: 3 # Set your retry limit
 
 jobs:
@@ -23,4 +23,4 @@ jobs:
         with:
           workflow: validate.yaml
           token: ${{ secrets.ACCESS_TOKEN }}
-          # ref: ${{ steps.extract_branch.outputs.branch }}
+          ref: "branch1"
