@@ -1,12 +1,60 @@
-name: Get PR Number
+name: validate workflows which run on pull request and add comment
 
 on:
-  pull_request:
+  pull_request: 
     types: [opened, synchronize, reopened]
 
+env: 
+  WORKFLOW_FILE: new.yml
+
 jobs:
-  print_pr_number:
+  check_workflows:
     runs-on: ubuntu-latest
     steps:
-      - name: Get PR Number
-        run: echo "PR Number: ${{ github.event.pull_request.number }}"
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: List .yaml and .yml files in workflows directory
+        id: get_files
+        run: |
+          FILES=$(ls .github/workflows/*.{yaml,yml} | grep -v "$WORKFLOW_FILE" | tr '\n' ' ')
+          echo "workflow_files=$FILES" >> $GITHUB_ENV
+      
+
+      - name: get PR number
+        id: pr
+        run: |
+          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+
+      - name: install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: check if workflows for pull_request trigger
+        id: check_pull_request
+        run: |
+          IFS=' ' read -r -a files <<< "${{ env.workflow_files }}"
+          FOUND_PR_WORKFLOW=false
+          for file in "${files[@]}"; do
+            ON_SECTION=$(yq e '.on' $file)
+            if [[ $ON_SECTION == *"pull_request"* ]]; then
+              FOUND_PR_WORKFLOW=true
+              echo "Workflow $file is triggered by pull requests"
+              break
+            fi
+          done
+          echo "found=$FOUND_PR_WORKFLOW" >> $GITHUB_ENV
+
+      - name: Create Comment
+        if: env.found == 'false'
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ env.pr_number }}
+          body: |
+            This is a multi-line test comment. 
+            - With Github **Markdown** :sparkles:
+            - Created by [create-or-update-comment][1]
+
+            [1]: https://github.com/peter-evans/create-or-update-comment
+          reactions: '+1'
