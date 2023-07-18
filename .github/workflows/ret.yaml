@@ -14,7 +14,7 @@ jobs:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{ secrets.PAT }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           repository: ${{ github.repository }}
           event-type: retry-workflow
           client-payload: '{"workflow_id": "${{ github.event.workflow_run.workflow_id }}"}'
