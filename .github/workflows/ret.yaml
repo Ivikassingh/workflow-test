@@ -18,3 +18,6 @@ jobs:
           repository: ${{ github.repository }}
           event-type: retry-workflow
           client-payload: '{"workflow_id": "${{ github.event.workflow_run.workflow_id }}"}'
+          
+      - name: Print Workflow Name
+        run: echo "The workflow name is ${{ github.event.workflow_run.name }}"
