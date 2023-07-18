@@ -1,0 +1,19 @@
+name: Workflow Failure Monitor
+
+on:
+  workflow_run:
+    types:
+      - completed
+
+jobs:
+  check-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.PAT }}
+          repository: ${{ github.repository }}
+          event-type: retry-workflow
+          client-payload: '{"workflow_id": "${{ github.event.workflow_run.workflow_id }}"}'
