@@ -2,6 +2,7 @@ name: Workflow Failure Monitor
 
 on:
   workflow_run:
+    workflows: ["new.yaml"]
     types:
       - completed
 
