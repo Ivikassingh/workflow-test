@@ -11,13 +11,28 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     steps:
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.ACCESS_TOKEN }}
-          repository: ${{ github.repository }}
-          event-type: retry-workflow
-          client-payload: '{"workflow_id": "${{ github.event.workflow_run.workflow_id }}"}'
+    - name: Check retry count
+        id: check-retry
+        run: |
+          # Get the last 3 runs of the workflow
+          runs=$(curl -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.event.workflow_run.workflow_id }}/runs?per_page=3")
+
+          # Count how many of them were failures
+          failures=$(echo "$runs" | jq '[.workflow_runs[] | select(.conclusion == "failure")] | length')
+
+          # If there were 3 failures, fail the step
+          if [ "$failures" -ge 3 ]; then
+            echo "Workflow failed after 3 retries."
+            exit 1
+          fi
+      # - name: Repository Dispatch
+      #   uses: peter-evans/repository-dispatch@v2
+      #   with:
+      #     token: ${{ secrets.ACCESS_TOKEN }}
+      #     repository: ${{ github.repository }}
+      #     event-type: retry-workflow
+      #     client-payload: '{"workflow_id": "${{ github.event.workflow_run.workflow_id }}"}'
 
       - name: Print Workflow Name
         run: echo "The workflow name is ${{ github.event.workflow_run.name }}"
