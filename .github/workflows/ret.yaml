@@ -14,25 +14,24 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     
     steps:
-    # - name: Check run count
-    #   id: check
-    #   run: echo "::set-output name=count::$(gh run list -w 'Your Workflow ID' --json status | jq '[.runs[] | select(.status=="completed" and .conclusion=="failure")] | length')"
-    # - name: Check Count
-    #   if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    #   uses: actions/github-script@v5
-    #   with:
-    #     github-token: ${{ secrets.ACCESS_TOKEN }}
-    #     script: |
-    #       # const workflow_id = "${{ github.event.workflow_run.workflow_id }}"
-    #       # const result = await github.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
-    #       #   owner: context.repo.owner,
-    #       #   repo: context.repo.repo,
-    #       #   workflow_id: "61472218"
-    #       # })
-    #       # console.log(result)
-    #       # # const run_attempts = result.data.workflow_runs.find(run => run.id === run_id).run_attempt
-    #       # # echo $run_attempts
-    #       echo "Test"
+    - name: Check Count
+      if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+      uses: actions/github-script@v5
+      with:
+        github-token: ${{ secrets.ACCESS_TOKEN }}
+        script: |
+          const workflow_id = ${{ github.event.workflow_run.workflow_id }}; // Use GitHub Actions expression here
+          const owner = context.repo.owner;
+          const repo = context.repo.repo;
+          const result = await github.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
+            owner: owner,
+            repo: repo,
+            workflow_id: workflow_id
+          })
+          console.log(result);
+          const run_id = result.data.workflow_runs[0].id; // Assuming the first run is the one you want
+          const run_attempts = result.data.workflow_runs.find(run => run.id === run_id).run_attempt;
+          console.log(run_attempts);
        
     - name: Rerun Workflow
       if: ${{ github.event.workflow_run.conclusion == 'failure' }}
