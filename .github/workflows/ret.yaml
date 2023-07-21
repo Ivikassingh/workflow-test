@@ -36,7 +36,7 @@ jobs:
           core.setOutput('run_attempts', run_attempts);
        
     - name: Rerun Workflow
-      if: ${{ github.event.workflow_run.conclusion == 'failure'   && steps.check_attempts.outputs.run_attempts < 2}}
+      if: ${{ github.event.workflow_run.conclusion == 'failure'   && steps.count.outputs.run_attempts < 2}}
       uses: actions/github-script@v5
       with:
         github-token: ${{ secrets.ACCESS_TOKEN }}
