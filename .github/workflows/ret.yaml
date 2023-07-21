@@ -33,7 +33,7 @@ jobs:
     #         run_id: run_id
     #       })
     #       console.log(result)
-- name: Rerun Workflow
+- name: Rerun Workflow 0
       if: ${{ github.event.workflow_run.conclusion == 'failure' }}
       uses: actions/github-script@v5
       with:
