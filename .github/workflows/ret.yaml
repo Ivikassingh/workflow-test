@@ -6,41 +6,26 @@ on:
     types:
       - completed 
 
+
+
 jobs:
-  check-failure:
+  check_and_rerun:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    
     steps:
-      - name: Check retry count
-        id: check-retry
-        run: |
-          # Get the last 3 runs of the workflow
-          runs=$(curl -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.event.workflow_run.workflow_id }}/runs?per_page=3")
+    - name: Check run count
+      id: check
+      run: echo "::set-output name=count::$(gh run list -w 'Your Workflow ID' --json status | jq '[.runs[] | select(.status=="completed" and .conclusion=="failure")] | length')"
 
-          # Count how many of them were failures
-          failures=$(echo "$runs" | jq '[.workflow_runs[] | select(.conclusion == "failure")] | length')
-
-          # If there were 3 failures, fail the step
-          if [ "$failures" -ge 3 ]; then
-            echo "Workflow failed after 3 retries."
-            exit 1
-          fi
-      # - name: Repository Dispatch
-      #   uses: peter-evans/repository-dispatch@v2
-      #   with:
-      #     token: ${{ secrets.ACCESS_TOKEN }}
-      #     repository: ${{ github.repository }}
-      #     event-type: retry-workflow
-      #     client-payload: '{"workflow_id": "${{ github.event.workflow_run.workflow_id }}"}'
-
-      - name: Print Workflow Name
-        run: echo "The workflow name is ${{ github.event.workflow_run.name }}"
-
-      - name: Retry Workflow
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ github.event.workflow_run.workflow_id }}/dispatches \
-            -d '{"ref":"${{ github.event.workflow_run.head_branch }}"}'
+    - name: Rerun workflow
+      uses: actions/github-script@v5
+      if: ${{ steps.check.outputs.count < 3 }}
+      with:
+        script: |
+          const run_id = "${{ github.event.workflow_run.id }}"
+          const result = await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun', {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            run_id: run_id
+          })
