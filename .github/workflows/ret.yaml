@@ -30,8 +30,8 @@ jobs:
             workflow_id: workflow_id
           })
           console.log(result)
-          const run_attempts = result.data.workflow_runs.find(run => run.id === run_id).run_attempt
-          echo $run_attempts
+          # const run_attempts = result.data.workflow_runs.find(run => run.id === run_id).run_attempt
+          # echo $run_attempts
        
     - name: Rerun Workflow
       if: ${{ github.event.workflow_run.conclusion == 'failure' }}
