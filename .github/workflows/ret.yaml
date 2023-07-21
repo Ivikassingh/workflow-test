@@ -27,7 +27,7 @@ jobs:
           const result = await github.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
             owner: context.repo.owner,
             repo: context.repo.repo,
-            workflow_id: workflow_id
+            workflow_id: 61472218
           })
           console.log(result)
           # const run_attempts = result.data.workflow_runs.find(run => run.id === run_id).run_attempt
