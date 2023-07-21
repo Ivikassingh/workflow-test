@@ -14,7 +14,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     
     steps:
-    - name: Check Count
+    - name: Check Count 
       id: count
       uses: actions/github-script@v5
       with:
