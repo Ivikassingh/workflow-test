@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     
-    # steps:
+    steps:
     # - name: Check run count
     #   id: check
     #   run: echo "::set-output name=count::$(gh run list -w 'Your Workflow ID' --json status | jq '[.runs[] | select(.status=="completed" and .conclusion=="failure")] | length')"
